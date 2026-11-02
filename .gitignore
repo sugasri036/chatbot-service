@@ -31,3 +31,34 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Kubernetes secrets
+k8s/secret.yaml
+k8s/secrets.yaml
+**/secret.yaml
+**/secrets.yaml
+
+# Java / Maven
+target/
+*.class
+*.jar
+
+# Logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
