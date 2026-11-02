@@ -36,12 +36,23 @@ public class ChatbotService {
 
     public ChatbotService(
             @Value("${ollama.base-url}") String baseUrl,
-            @Value("${ollama.model}") String model,
+            @Value("${ollama.model:qwen2.5:3b}") String model,
+            @Value("${ollama.proxy-token:}") String proxyToken,
             KnowledgeBaseService knowledgeBaseService,
             ChatConversationRepository conversationRepository,
             ChatMessageRepository messageRepository) {
 
-        this.restClient = RestClient.create(baseUrl);
+        RestClient.Builder builder = RestClient.builder()
+                .baseUrl(baseUrl);
+
+        if (proxyToken != null && !proxyToken.isBlank()) {
+            builder.defaultHeader(
+                    "Authorization",
+                    "Bearer " + proxyToken
+            );
+        }
+
+        this.restClient = builder.build();
         this.model = model;
         this.knowledgeBaseService = knowledgeBaseService;
         this.conversationRepository = conversationRepository;
@@ -56,7 +67,6 @@ public class ChatbotService {
 
         ChatConversation conversation;
 
-        // Create a new conversation or retrieve an existing one
         if (requestedConversationId == null ||
                 requestedConversationId.isBlank()) {
 
@@ -199,7 +209,7 @@ public class ChatbotService {
                 "messages", ollamaMessages
         );
 
-        // Call Ollama
+        // Call authenticated Ollama API
         Map<?, ?> response = restClient.post()
                 .uri("/api/chat")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -229,7 +239,7 @@ public class ChatbotService {
             );
         }
 
-        // Persist the successful conversation exchange
+        // Persist conversation exchange
         messageRepository.save(
                 new ChatMessage(conversationId, "user", message)
         );

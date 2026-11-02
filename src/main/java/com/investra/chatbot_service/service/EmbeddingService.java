@@ -17,9 +17,20 @@ public class EmbeddingService {
 
     public EmbeddingService(
             @Value("${ollama.base-url}") String baseUrl,
-            @Value("${ollama.embedding-model:nomic-embed-text}") String embeddingModel) {
+            @Value("${ollama.embedding-model:nomic-embed-text}") String embeddingModel,
+            @Value("${ollama.proxy-token:}") String proxyToken) {
 
-        this.restClient = RestClient.create(baseUrl);
+        RestClient.Builder builder = RestClient.builder()
+                .baseUrl(baseUrl);
+
+        if (proxyToken != null && !proxyToken.isBlank()) {
+            builder.defaultHeader(
+                    "Authorization",
+                    "Bearer " + proxyToken
+            );
+        }
+
+        this.restClient = builder.build();
         this.embeddingModel = embeddingModel;
     }
 
